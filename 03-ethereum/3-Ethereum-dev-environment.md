@@ -379,7 +379,7 @@ artifacts
 Install prettiers, linters and configure their configurations files as follow:
 
 ```zsh
-yarn add prettier prettier-plugin-solidity solhint yarn add --dev eslint eslint-config-standard eslint-plugin-import eslint-plugin-mocha-no-only eslint-plugin-node eslint-plugin-promise eslint-plugin-standard --dev
+yarn add prettier prettier-plugin-solidity solhint eslint eslint-config-standard eslint-plugin-import eslint-plugin-mocha-no-only eslint-plugin-node eslint-plugin-promise eslint-plugin-standard --dev
 ```
 
 _.prettierrc_:
