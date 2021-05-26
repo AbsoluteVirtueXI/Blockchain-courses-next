@@ -346,8 +346,8 @@ https://hardhat.org/tutorial/creating-a-new-hardhat-project.html
 
 Install the following extensions:
 [EditorConfig for VS Code](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)  
-[ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-[Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+[ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)  
+[Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)  
 [solidity by Juan Branco](https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity)
 
 ### Create a new project
@@ -369,6 +369,9 @@ node_modules
 #Hardhat files
 cache
 artifacts
+
+#VSCode files
+.vscode
 ```
 
 ### Install and configure prettiers and linters
