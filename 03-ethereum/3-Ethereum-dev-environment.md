@@ -538,8 +538,8 @@ yarn add @nomiclabs/hardhat-ethers ethers @nomiclabs/hardhat-waffle ethereum-waf
 Configure `hardhat.config.js` for enabling `hardhat-waffle` and `hardhat-solhint` plugins and set your compiler version
 
 ```js
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-solhint')
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-solhint');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
