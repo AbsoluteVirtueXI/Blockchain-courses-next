@@ -55,9 +55,9 @@ _IGreeter.sol_:
 pragma solidity ^0.8.0;
 
 interface IGreeter {
-    function sayHello() external view returns (string memory);
+    function sayHello() external pure returns (string memory);
 
-    function sayGoodbye() external view returns (string memory);
+    function sayGoodbye() external pure returns (string memory);
 }
 ```
 
