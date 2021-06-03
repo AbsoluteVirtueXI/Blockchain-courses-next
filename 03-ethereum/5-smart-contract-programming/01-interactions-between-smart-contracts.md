@@ -168,6 +168,7 @@ function add(int256 nb1, int256 nb2) public returns(int256) {
 }
 ```
 
+Vous pouvez y ajouter des `modifier`s si c'est nécéssaire.  
 Ce smart contract possédera un owner qui pourra `withdraw` les tokens accumulés par le smart contract.
 
 5. Vous devrez fournir les tests unitaires qui justifieront du bon fonctionnement de vos smart contracts.
