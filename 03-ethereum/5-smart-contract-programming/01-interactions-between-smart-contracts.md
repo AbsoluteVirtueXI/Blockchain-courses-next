@@ -141,7 +141,7 @@ _greeter.sayGoodbye();
 On remarque que `Say` est dépendant de `Greeter`, car l'adresse de `Greeter` doit être connue avant que `Say` soit déployé. En effet l'adresse de `Greeter` doit être passée en paramètre du constructor de `Say`.
 Cela s'applique également à nos tests. Nous pourrons tester `Greeter` en standalone car il n'a aucune dépendance, par contre pour tester `Say` il faudra aussi que l'on déploie `Greeter` dans nos [tests](https://github.com/BlockMagnet/interactions-contracts/blob/main/test/Say-test.js#L10).
 
-## Exercice: ICO
+## Exercice: ICO & Calculator
 
 1. Créer un ERC20 en utilisant les librairies d'OpenZepplin.
 
@@ -159,8 +159,19 @@ Cela s'applique également à nos tests. Nous pourrons tester `Greeter` en stand
    - Ajouter des getters utilitaires pour obtenir le montant des `wei` gagnés, le nombre de tokens vendus, le prix en wei d'un token etc...
    - Ajouter des events.
 
-4. Vous devrez fournir les tests unitaires qui justifieront du bon fonctionnement de votre ICO.
-   **Attention à bien penser à `approve` le smart contract de l'ICO en tant qu'`owner` des tokens afin d'autoriser le smart contract de l'ICO à transférer les tokens aux acheteurs dans vos tests.**
+4. Créer un smart contract `Calculator` qui nécessitera 1 de vos tokens pour effectuer l'une des 5 opérations arithmétiques d'addition, soustraction, multiplication, division et modulo. Ces fonctions devront retourner le résultat de l'opération et aussi émettre un `event` afin que l'on puisse récupérer ce résultat depuis notre Frontend.
+   Par exemple la fonction `add` devra être déclarée ainsi:
+
+```solidity
+function add(int256 nb1, int256 nb2) public returns(int256) {
+    // insérer votre code ici
+}
+```
+
+Ce smart contract possédera un owner qui pourra `withdraw` les tokens accumulés par le smart contract.
+
+5. Vous devrez fournir les tests unitaires qui justifieront du bon fonctionnement de vos smart contracts.
+   **Attention à bien penser à `approve` le smart contract de l'ICO en tant qu'`owner` des tokens afin d'autoriser le smart contract de l'ICO à transférer les tokens aux acheteurs dans vos tests et aussi à `approve` le smart contract Calculator en tant qu'utilisateur pour que le smart contract Calculator puisse utiliser la fonction `transferFrom`**.
 
 ## Smart contracts deploying smart contracts
 
