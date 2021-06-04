@@ -554,3 +554,36 @@ By enabling the `hardhat-solhint` plugin, `npx hardhat check` task will run `sol
 ### Install usefull plugins
 
 #### hardhat-docgen
+
+[hardhat-docgen](https://hardhat.org/plugins/hardhat-docgen.html) nous permet de générer de la documentation depuis nos commentaires NatSpec.
+Installer hardhat-docgen:
+
+```bash
+yarn add --dev hardhat-docgen
+```
+
+Charger le plugin dans _hardhat.config.js_ et configurer le plugin sous la clef `docgen`:
+
+```js
+require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-solhint')
+require('hardhat-docgen')
+
+/**
+ * @type import('hardhat/config').HardhatUserConfig
+ */
+module.exports = {
+  solidity: '0.8.4',
+  docgen: {
+    path: './docs',
+    clear: true,
+    runOnCompile: true,
+  },
+}
+```
+
+Ainsi à chaque compilation de notre projet Hardhat un dossier `docs/` contenant la documentation de nos smart contracts selon leurs commentaires NatSpec sera généré.
+
+### Fork a network for testing
+
+### Deploy on public networks.
