@@ -336,8 +336,6 @@ En général pour préférerons utiliser des scripts pour s'interfacer avec notr
 
 ### Architecture of an Hardhat project
 
-List directories and files here and their functions
-
 ## Setup an Ethereum development environment
 
 https://hardhat.org/tutorial/creating-a-new-hardhat-project.html
@@ -584,6 +582,200 @@ module.exports = {
 
 Ainsi à chaque compilation de notre projet Hardhat un dossier `docs/` contenant la documentation de nos smart contracts selon leurs commentaires NatSpec sera généré.
 
-### Fork a network for testing
+### Deploy on public networks
 
-### Deploy on public networks.
+Pour déployer sur un réseau public comme le mainnet ou un des testnets nous devons configurer des points d'entrée dans le fichier de configuration _hardhat.config.js_. Les points d'entrée peuvent aussi bien être l'url d'une api ou d'un noeud Ethereum.  
+Pour cela nous allons utiliser le service [infura](https://infura.io/) ou [alchemy](https://www.alchemy.com/). L'avantage est que ces services pointent sur plusieurs nodes Ethereum nous offrant ainsi une meilleure qualité de service que si nous étions dépendant que d'un unique noeud Ethereum.
+
+#### Infura
+
+Créer un compte et un nouveau projet sur [infura](https://infura.io/)
+Dans le dashboard de votre projet, vous avez accès aux `SETTINGS` qui contiennent le `PROJECT ID` de votre projet.
+Vous avez désormais des `endpoints` disponibles sur l'ensemble des réseaux Ethereum qui sont des urls que vous devrez utiliser pour communiquer avec la blockchain Ethereum pour effectuer les déploiements des smart contracts.
+
+#### dotenv and Private key
+
+Maintenant que nous avons accès à la blockchain Ethereum via l'api `infura` il nous faut configurer un account qui puisse effectuer des transactions de déploiements (pas obligatoirement que des déploiements).  
+Pour cela il nous faut la clef privée de cet account, et que cet account possède également de l'Ether afin de payer les frais de gas sur le réseau.  
+Néanmoins il ne faudra jamais que cette clé privée se retrouve publiée et visible, particulièrement sur Github!!!
+Dans de nombreux tutoriels sur Hardhat les clés privées sont écrites directement dans le fichier _hardhat.config.js_, **IL NE FAUT SURTOUT PAS ECRIRE VOS CLEFS PRIVEES DANS LE FICHIER _hardhat.config.js_**.  
+Il est recommandé d'écrire les données sensibles dans un fichier _.env_ que l'on ajoutera dans le fichier _.gitignore_ afin qu'il soit ignoré lors du push de votre projet sur Github.  
+Ensuite dans le fichier _hardhat.config.js_ nous utiliserons `dotenv` afin de récupérer les valeurs du fichier _.env_, le `INFURA_PROJECT_ID` et la `PRIVATE_KEY` qui nous permettront de configurer _hardhat.config.js_ pour effectuer des transactions de déploiements sur la blockchain Ethereum.
+
+#### Setup for deploying on public network
+
+Installer `dotenv`:
+
+```zsh
+yarn add dotenv --dev
+```
+
+A la racine de votre projet Hardhat créer un fichier _.env_ qui contient les informations suivantes:
+_.env_:
+
+```zsh
+INFURA_PROJECT_ID="ENTER INFURA PROJECT ID HERE"
+PRIVATE_KEY="ENTER YOUR PRIVATE KEY HERE"
+```
+
+Ajouter le fichier _.env_ dans le fichier _.gitignore_:
+
+```zsh
+node_modules
+
+#Hardhat files
+cache
+artifacts
+
+#dotenv
+.env
+```
+
+Configurer _hardhat.config.js_ afin de récupérer l'`INFURA_PROJECT_ID` et la `PRIVATE_KEY` de l'account qui effectuera les déploiements et rajouter les points d'entrée réseaux comme ci dessous:
+
+```js
+require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-solhint')
+require('hardhat-docgen')
+
+require('dotenv').config()
+const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID
+const PRIVATE_KEY = process.env.PRIVATE_KEY
+
+/**
+ * @type import('hardhat/config').HardhatUserConfig
+ */
+module.exports = {
+  solidity: '0.8.4',
+  networks: {
+    mainnet: {
+      url: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
+    kovan: {
+      url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
+    goerli: {
+      url: `https://goerli.infura.io/v3/${INFURA_PROJECT_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
+  },
+  docgen: {
+    path: './docs',
+    clear: true,
+    runOnCompile: true,
+  },
+}
+```
+
+la clef `accounts` est un tableau de clefs privées. Par défaut la première clef privée, `accounts[0]`, est utilisée dans nos scripts.  
+la clef `accounts` peut également être une seed phrase: https://hardhat.org/config/#hd-wallet-config  
+Si plusieurs accounts sont définis et que nous souhaitons utiliser un account particulier pour nos scripts, il faudra comme pour nos tests unitaires récupérer la liste de tous les signers et appliquer un destructuring assignement:
+
+```js
+const [account1, account2, account3] = await ethers.getSigners()
+```
+
+Bien qu'il ne soit pas indiqué il existe toujours par défaut un network `localhost` qui correspond au Hardhat network lancé depuis la commande `npx hardhat node`.
+
+#### Write a deployment script
+
+Lorsque nos smart contracts compilent sans erreurs et que tous les tests unitaires sont passés avec succès nous pouvons écrire des scripts de déploiements pour nos smart contracts.  
+Le nom des scripts de déploiement doivent suivre cette convention: _deploy-NomDuContract.js_  
+Tous les scripts de déploiements doivent être dans le dossier _scripts/_ et doivent suivre la structure ci dessous:
+_scripts/deploy-Greeter.js_:
+
+```js
+const hre = require('hardhat')
+
+async function main() {
+  // Hardhat always runs the compile task when running scripts with its command
+  // line interface.
+  //
+  // If this script is run directly using `node` you may want to call compile
+  // manually to make sure everything is compiled
+  // await hre.run('compile');
+
+  // Optionnel car l'account deployer est utilisé par défaut
+  const [deployer] = await ethers.getSigners()
+  console.log('Deploying contracts with the account:', deployer.address)
+
+  // We get the contract to deploy
+  const Greeter = await hre.ethers.getContractFactory('Greeter')
+  const greeter = await Greeter.deploy('Hello, Hardhat!')
+
+  // Attendre que le contrat soit réellement déployé, cad que la transaction de déploiement
+  // soit incluse dans un bloc
+  await greeter.deployed()
+
+  // Afficher l'adresse de déploiement
+  console.log('Greeter deployed to:', greeter.address)
+}
+
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+```
+
+#### deploy
+
+Exécuter le script de déploiement en spécifiant l'un des networks configurés dans _hardhat.config.js_:
+
+```zsh
+npx hardhat run scripts/deploy-Greeter.js --network rinkeby
+```
+
+Il faut récupérer l'adresse affichée via un `console.log` depuis le scripts de déploiements!!!
+Pour une meilleure solution voir ci dessous.
+
+#### deployed.json
+
+Idéalement il faudrait ajouter du code à nos scripts de déploiements afin de garder les informations suivantes dans un fichier:
+
+- nom du smart contract déployé
+- nom du réseau sur lequel le smart contract a été déployé
+- l'adresse du smart contract déployé
+
+**Exercice**:
+Voici la structure attendue d'un exemple de fichier _deployed.json_:
+
+```json
+{
+  "Greeter": {
+    "rinkeby": {
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    },
+    "kovan": {
+      "address": "0xfe0035DD6677D6aA6b876F442f4A4F7dF7a550dd"
+    }
+  }
+}
+```
+
+Ecrire du code, et idéalement une fonction, qui après chaque déploiement réussi effectue une mise à jour du fichier _deployed.json_ avec les nouvelles informations.  
+le nom du réseau de déploiement est accessible depuis nos scripts de déploiement via la variable `hre.network.name`.
+
+### hardhat-project-template
+
+Utiliser le template: https://github.com/BlockMagnet/hardhat-project-template
+N'oubliez d'exécuter la commande `yarn` afin d'installer tous les packages et de créer un fichier `.env` qui suit ce format:
+_.env_:
+
+```zsh
+INFURA_PROJECT_ID="ENTER INFURA PROJECT ID HERE"
+PRIVATE_KEY="ENTER YOUR PRIVATE KEY HERE"
+```
