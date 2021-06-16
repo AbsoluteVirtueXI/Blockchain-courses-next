@@ -600,7 +600,7 @@ Pour cela il nous faut la clef privée de cet account, et que cet account possè
 Néanmoins il ne faudra jamais que cette clé privée se retrouve publiée et visible, particulièrement sur Github!!!
 Dans de nombreux tutoriels sur Hardhat les clés privées sont écrites directement dans le fichier _hardhat.config.js_, **IL NE FAUT SURTOUT PAS ECRIRE VOS CLEFS PRIVEES DANS LE FICHIER _hardhat.config.js_**.  
 Il est recommandé d'écrire les données sensibles dans un fichier _.env_ que l'on ajoutera dans le fichier _.gitignore_ afin qu'il soit ignoré lors du push de votre projet sur Github.  
-Ensuite dans le fichier _hardhat.config.js_ nous utiliserons `dotenv` afin de récupérer les valeurs du fichier _.env_, le `INFURA_PROJECT_ID` et la `PRIVATE_KEY` qui nous permettront de configurer _hardhat.config.js_ pour effectuer des transactions de déploiements sur la blockchain Ethereum.
+Ensuite dans le fichier _hardhat.config.js_ nous utiliserons `dotenv` afin de récupérer les valeurs du fichier _.env_, le `INFURA_PROJECT_ID` et la `DEPLOYER_PRIVATE_KEY` qui nous permettront de configurer _hardhat.config.js_ pour effectuer des transactions de déploiements sur la blockchain Ethereum.
 
 #### Setup for deploying on public network
 
@@ -615,7 +615,7 @@ _.env_:
 
 ```zsh
 INFURA_PROJECT_ID="ENTER INFURA PROJECT ID HERE"
-PRIVATE_KEY="ENTER YOUR PRIVATE KEY HERE"
+DEPLOYER_PRIVATE_KEY="ENTER YOUR PRIVATE KEY HERE"
 ```
 
 Ajouter le fichier _.env_ dans le fichier _.gitignore_:
@@ -631,7 +631,7 @@ artifacts
 .env
 ```
 
-Configurer _hardhat.config.js_ afin de récupérer l'`INFURA_PROJECT_ID` et la `PRIVATE_KEY` de l'account qui effectuera les déploiements et rajouter les points d'entrée réseaux comme ci dessous:
+Configurer _hardhat.config.js_ afin de récupérer l'`INFURA_PROJECT_ID` et la `DEPLOYER_PRIVATE_KEY` de l'account qui effectuera les déploiements et rajouter les points d'entrée réseaux comme ci dessous:
 
 ```js
 require('@nomiclabs/hardhat-waffle')
@@ -640,7 +640,7 @@ require('hardhat-docgen')
 
 require('dotenv').config()
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID
-const PRIVATE_KEY = process.env.PRIVATE_KEY
+const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -650,23 +650,23 @@ module.exports = {
   networks: {
     mainnet: {
       url: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },
   },
   docgen: {
@@ -777,5 +777,5 @@ _.env_:
 
 ```zsh
 INFURA_PROJECT_ID="ENTER INFURA PROJECT ID HERE"
-PRIVATE_KEY="ENTER YOUR PRIVATE KEY HERE"
+DEPLOYER_PRIVATE_KEY="ENTER YOUR PRIVATE KEY HERE"
 ```
