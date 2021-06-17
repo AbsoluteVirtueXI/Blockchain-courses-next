@@ -232,12 +232,198 @@ https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/uti
 
 ## New type declarations
 
-Nous pouvons créer de nouveaux types `enum` et `struct`.  
+Avec Solidity nous pouvons déclarer nos propres types pour nos variables.  
+Ces nouveaux types sont des énumérations ou des structures.
+
+### enum
+
+#### Principle
+
+Certains langages permettent l'utilisation d'énumérations.
+Contrairement à JavaScript, nous pouvons utiliser des énumération en Solidity.  
+TypeScript aussi permet la déclaration d'énumérations.  
+C'est un concept très pratique lorsque nous connaissons toutes les valeurs possibles que pourrait contenir une variable et de limiter les valeurs que peut prendre une variable .
+Par exemple les directions dans un jeu: `Up`, `Down`, `Left`, `Right` ou bien des états possibles d'un programme: `Success`, `Error`, `Loading`.
+Les énumérations sont des outils pour rendre le code plus lisible et plus élégants, afin d'exprimer avec des mots des valeurs, et dans le cas particulier de Solidity des `uint8`.
+
+#### Comparison with JavaScript
+
+Pour que notre programme puisse avoir du sens à la lecture en JavaScript nous devrions écrire une gestion de direction de cette manière.
+
+```js
+// 0, 1, 2, 3 sont des codes/valeurs renvoyés par la manette de jeu
+// en fonction de la direction
+const Up = 0
+const Down = 1
+const Left = 2
+const Right = 3
+
+let currentDirection = getCurrentDirectionFromGamePad()
+
+switch (currentDirection) {
+  case Up:
+    moveUp()
+    break
+  case Down:
+    moveDown()
+    break
+  case Left:
+    moveLeft()
+    break
+  case Right:
+    moveRight()
+    break
+  default:
+    throw new Error('Bad direction')
+}
+```
+
+Nous associons un nombre (le code retourné par la manette de jeu) à un nom que nous pouvons utiliser ensuite pour référencer la direction.  
+Mais nous pouvons écrire du code qui n'aurait aucun sens pour notre application mais qui serait du JavaScript valide comme: `currentDirection = 777`
+Avec un type `enum` nous aurions la certitude que `currentDirection` ne pourra prendre que des valeurs connues d'avance, donc cohérente comme `Up`, `Down`, `Left`, `Right`.
+
+#### enum in Solidity
+
+En Solidity `enum` est un type de données qui consiste en un ensemble de valeurs constantes. Ces différentes valeurs représentent différents cas.  
+Nous devons déclarer notre nouveau type d'abord pour qu'il soit ensuite disponible dans l'ensemble de notre smart contract:
+
+```Solidity
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+contract Game {
+    // Types declarations
+    enum Direction { Up, Down, Left, Right }
+
+    // Storage variables
+    Direction private _currentDirection;
+
+    constructor() {
+        _currentDirection = Direction.Up;
+    }
+
+    function setDirection(Direction direction) public {
+        _currentDirection = direction;
+    }
+
+    function getDirection() public view returns(Direction) {
+        return _currentDirection;
+    }
+}
+```
+
+Notre variable de storage `_currentdirection` est de type `Direction`.  
+La fonction `setDirection` prend comme paramètre une variable de type `Direction`.  
+La fonction `getDirection` retourne une variable de type `Direction`.  
+En réalité à la compilation les variables d'un type `enum` sont converties en `uint8` avec le premier élement de l'enum qui est à 0, le suivant à 1, etc...
+Mais dans notre smart contract il faudra absolument utiliser le type de l'`enum` lorsqu'il est attendu pour une assignation avec l'opérateur `=`, un passage en paramètre d'une fonction ou pour la valeur de retour d'une fonction.  
+Nous pouvons vérifier cela en observant l'abi du smart contract `Game`:
+
+```json
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "getDirection",
+    "outputs": [
+      {
+        "internalType": "enum Game.Direction",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum Game.Direction",
+        "name": "direction",
+        "type": "uint8"
+      }
+    ],
+    "name": "setDirection",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
+```
+
+#### Passing and returning enum types from functions.
+
+Comme remarqué précédemment, dans nos smart contracts il faudra absolument que le type enum soit respecté pour nos appels de fonctions, ainsi dans notre code Solidity il faudra utiliser le type `enum` pour le type des arguments à passer à une fonction qui attend une `enum` comme paramètre. Cela s'applique aussi a des fonctions d'un smart contract distant:
+
+```solidity
+pragma solidity ^0.8.0;
+import "./Game.sol";
+
+contract ExternalContract {
+    Game private _game;
+    constructor(address gameAddress) {
+        _game = Game(gameAddress);
+    }
+
+    function setGameDirection(Game.Direction direction) public {
+        _game.setDirection(direction);
+    }
+
+    function getGameDirection() public view returns(Game.Direction){
+        return _game.getDirection();
+    }
+}
+```
+
+Pour des appels offchain/web3 c'est différent.
+Avec `ethers.js` il faudra passer un nombre (pas un Big number) pour appeler des fonctions qui prennent une `enum` comme paramètre, et la valeur de retour d'une fonction qui retourne une enum sera convertie en nombre aussi coté web3.
+
+```js
+let direction = await game.getDirection()
+console.log(typeof direction) // print "number"
+await game.setDirection(3) // set _direction à Direction.Down
+direction = await game.getDirection() // direction == 3
+```
+
+#### conversion
+
+Les conversions implicites ne sont pas possibles, les codes suivants entraineront une erreur à la compilation:
+
+```solidity
+Direction dir1 = _currentDirection + 1;
+Direction dir2 = _currentDirection + Direction.Up;
+Direction dir3 = Direction.Up + Direction.Down;
+setDirection(3); // Le nombre 3 est différent de Direction.Down
+```
+
+Si nous voulons effectuer des opérations arithmétiques sur les variables d'un type enum, si cela à du sens dans notre code, il faudra convertir cette variable explicitement en nombre:
+
+```solidity
+uint8 code1 = uint8(_currentDirection) + 1;
+2 == uint8(Direction.Left); // true
+```
+
+La conversion inverse, un nombre vers l'élément d'une `enum` est possible aussi:
+
+```solidity
+Direction dir1 = Direction(0) // dir1 == Direction.Up
+Direction dir2 = Direction(1) // dir2 == Direction.Down
+Direction dir3 = Direction(2 + 1) // dir3 == Direction.Right
+```
+
+### struct
+
+Nous pouvons créer de nouveaux types `enum` et `struct`.
 Nous reviendrons sur ce point dans les chapitres suivants.
 
 ## Storage: state variables
 
-Les variables d'états sont persistantes et sont stockées de manière permanente dans le `storage` du smart contract.  
+Les variables d'états sont persistantes et sont stockées de manière permanente dans le `storage` du smart contract.
 Le `storage` est un espace mémoire que l'on pourrait comparer à un disque dur.
 A leur déclaration Les variables d'états se composent:
 
@@ -255,7 +441,7 @@ Pour l'instant nous ne travaillons qu'avec des `uint256`, des `bool`, des `addre
 
 #### `constant`
 
-Les variables déclarées comme constantes doivent absolument être initialisées au moment de la compilation.  
+Les variables déclarées comme constantes doivent absolument être initialisées au moment de la compilation.
 La valeur d'une variable constante doit être connue avant le déploiement du smart contract.
 La valeur d'une variable constante ne pourra jamais être modifiée.
 
