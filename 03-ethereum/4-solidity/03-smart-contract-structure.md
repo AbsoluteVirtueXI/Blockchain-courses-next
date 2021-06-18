@@ -538,7 +538,7 @@ function certify(address account) public OnlyInstructor {
 }
 ```
 
-#### Passing and returning enum types from functions.
+#### Passing and returning struct types from functions.
 
 Comme pour une `enum`, dans nos smart contracts il faudra absolument que le type de la structure soit respecté pour nos appels de fonctions, ainsi dans notre code Solidity il faudra utiliser le type de la structure pour le type des arguments à passer à une fonction qui attend une structure comme paramètre. Cela s'applique aussi a des fonctions d'un smart contract distant.
 
