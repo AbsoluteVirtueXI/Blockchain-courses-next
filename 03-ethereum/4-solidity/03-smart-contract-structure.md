@@ -516,7 +516,7 @@ _students[msg.sender] = Student(
 // 3rd way: Passer par une variable initialisé avec des valeurs par défauts.
 // Pour ensuite initialiser les propriétés qui nous intéressent une par une.
 // Cette méthode est obligatoire si notre struct contient un mapping
-Student student;
+Student memory student;
 student.firstName = firstName;
 student.lastName = lastName;
 // etc...
