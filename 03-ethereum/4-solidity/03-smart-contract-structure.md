@@ -498,19 +498,30 @@ function getStudent(address account) public view returns (Student memory) {
 
 Il existe 2 autres façons de déclarer une variable de type struct:
 
+    Course course;
+    bool isActive;
+    bool isCertified;
+    uint256 certificationDate;
+    uint256 certificationDateLimit;
+    uint256 age;
+    uint256 registrationDate;
+    string firstName;
+    string lastName;
+    string githubUrl;
+
 ```solidity
 // 2nd way: Passer les arguments dans le même ordre que les propriétés de la struct
 _students[msg.sender] = Student(
-    firstName,
-    lastName,
-    githubUrl,
-    age,
     course,
     true,
     false,
     0,
     block.timestamp + 200 days,
-    block.timestamp
+    age,
+    block.timestamp,
+    firstName,
+    lastName,
+    githubUrl
 );
 
 // 3rd way: Passer par une variable initialisé avec des valeurs par défauts.
