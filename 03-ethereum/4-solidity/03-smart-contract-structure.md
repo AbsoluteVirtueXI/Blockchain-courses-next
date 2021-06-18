@@ -297,11 +297,8 @@ contract Game {
     enum Direction { Up, Down, Left, Right }
 
     // Storage variables
+    // default value of _currentDirection will be Direction.Up
     Direction private _currentDirection;
-
-    constructor() {
-        _currentDirection = Direction.Up;
-    }
 
     function setDirection(Direction direction) public {
         _currentDirection = direction;
@@ -316,7 +313,7 @@ contract Game {
 Notre variable de storage `_currentdirection` est de type `Direction`.  
 La fonction `setDirection` prend comme paramètre une variable de type `Direction`.  
 La fonction `getDirection` retourne une variable de type `Direction`.  
-En réalité à la compilation les variables d'un type `enum` sont converties en `uint8` avec le premier élement de l'enum qui est à 0, le suivant à 1, etc...
+En réalité à la compilation les variables d'un type `enum` sont converties en `uint8` avec le premier élément de l'enum qui est à 0, le suivant à 1, etc...
 Mais dans notre smart contract il faudra absolument utiliser le type de l'`enum` lorsqu'il est attendu pour une assignation avec l'opérateur `=`, un passage en paramètre d'une fonction ou pour la valeur de retour d'une fonction.  
 Nous pouvons vérifier cela en observant l'abi du smart contract `Game`:
 
@@ -418,8 +415,262 @@ Direction dir3 = Direction(2 + 1) // dir3 == Direction.Right
 
 ### struct
 
-Nous pouvons créer de nouveaux types `enum` et `struct`.
-Nous reviendrons sur ce point dans les chapitres suivants.
+L'autre moyen de créer ses propres types sont les `struct`.  
+Les `struct` servent à grouper un ensemble de variables qui ont du sens, pour ainsi donner des propriétés à une donnée que l'on souhaite exprimer en code.  
+Une `struct` se rapproche d'une `class` en JavaScript, mais contrairement à une `class` JavaScript, une `struct` en Solidity ne possède pas explicitement de constructor et ne possède pas de méthodes.
+
+#### struct declaration
+
+Le keyword `struct` sert à déclarer un nouveau type, donc comme pour une `enum` il faut d'abord déclarer notre nouveau type avant de l'utiliser:
+
+```solidity
+// Type declarations
+enum Course {Frontend, Backend, Blockchain, Security}
+
+struct Student {
+    Course course;
+    bool isActive;
+    bool isCertified;
+    uint256 certificationDate;
+    uint256 certificationDateLimit;
+    uint256 age;
+    uint256 registrationDate;
+    string firstName;
+    string lastName;
+    string githubUrl;
+}
+
+// Storage variable
+mapping(address => Student) private _students;
+```
+
+`Student` est un nouveau type que nous pouvons désormais utiliser dans notre smart contract.
+Il possède 10 propriétés:
+
+- `course` qui est de type `Course` qui correspond au module suivit par un étudiant
+- `isActive` qui est de type `bool` pour déterminer si un étudiant est en cours de formation
+- `isCertified` qui est de type `bool` pour déterminer si un étudiant a été certifié
+- `certificationDate` qui est de type `uint256` qui correspond à la date de certification de l'étudiant
+- `certificationDateLimit` qui est de type `uint256` qui correspond à la date limite à laquelle un étudiant pourra passer la certification
+- `age` qui est de type `uint256` qui correspond à l'âge de l'étudiant
+- `registrationData` qui est de type `uint256` qui correspond à la date d'inscription de l'étudiant
+- `firstName` qui est de type `string` qui correspond au prénom de l'étudiant
+- `lastName` qui est de type `string` qui correspond au nom de famille de l'étudiant
+- `githubUrl` qui est de type `string` qui correspond à l'url du Github de l'étudiant
+
+Puisque nous pourrions avoir plusieurs étudiants, et qui sont tous différents, une variable de storage pertinente serait un `mapping(address => Student)` afin de lier dans notre smart contract l'adresse Ethereum d'un étudiant à une structure `Student` qui contient toutes les informations le concernant.
+
+```solidity
+mapping(address => Student) private _students;
+```
+
+#### Using struct types
+
+Maintenant que notre type `Student` est déclaré nous pouvons définir des étudiants, pour ensuite les stocker dans la variable de storage `_students`.  
+Créons une fonction `register` qui permet à un nouvel étudiant de s'enregistrer:
+
+```solidity
+function register(
+    string memory firstName,
+    string memory lastName,
+    string memory githubUrl,
+    uint256 age,
+    Course course
+) public {
+    _students[msg.sender] = Student({
+        firstName: firstName,
+        lastName: lastName,
+        githubUrl: githubUrl,
+        age: age,
+        course: course,
+        isActive: true,
+        isCertified: false,
+        certificationDate: 0,
+        certificationDateLimit: block.timestamp + 200 days,
+        registrationDate: block.timestamp
+    });
+}
+
+function getStudent(address account) public view returns (Student memory) {
+    return _students[account];
+}
+```
+
+Il existe 2 autres façons de déclarer une variable de type struct:
+
+```solidity
+// 2nd way: Passer les arguments dans le même ordre que les propriétés de la struct
+_students[msg.sender] = Student(
+    firstName,
+    lastName,
+    githubUrl,
+    age,
+    course,
+    true,
+    false,
+    0,
+    block.timestamp + 200 days,
+    block.timestamp
+);
+
+// 3rd way: Passer par une variable initialisé avec des valeurs par défauts.
+// Pour ensuite initialiser les propriétés qui nous intéressent une par une.
+// Cette méthode est obligatoire si notre struct contient un mapping
+Student student;
+student.firstName = firstName;
+student.lastName = lastName;
+// etc...
+_students[msg.sender] = student;
+```
+
+#### Using struct variables
+
+Toutes les propriétés d'une struct sont accessibles par un `.`.
+Nous pouvons ainsi lire ou modifier les éléments d'une structure:
+
+```js
+function isCertified(address account) public view returns(bool) {
+    return _students[account].isCertified;
+}
+
+function certify(address account) public OnlyInstructor {
+    _students[account].isCertified = true;
+}
+```
+
+#### Passing and returning enum types from functions.
+
+Comme pour une `enum`, dans nos smart contracts il faudra absolument que le type de la structure soit respecté pour nos appels de fonctions, ainsi dans notre code Solidity il faudra utiliser le type de la structure pour le type des arguments à passer à une fonction qui attend une structure comme paramètre. Cela s'applique aussi a des fonctions d'un smart contract distant.
+
+La particularité est pour les appels offchain/web3.
+Si nous analysons la partie de l'abi qui correspond à la fonction `getStudent` qui retourne un struct nous obtenons:
+
+```json
+{
+  "inputs": [
+    {
+      "internalType": "address",
+      "name": "addr",
+      "type": "address"
+    }
+  ],
+  "name": "getStudent",
+  "outputs": [
+    {
+      "components": [
+        {
+          "internalType": "enum School.Course",
+          "name": "course",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCertified",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "certificationDate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "certificationDateLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "age",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "registrationDate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "firstName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "lastName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "githubUrl",
+          "type": "string"
+        }
+      ],
+      "internalType": "struct School.Student",
+      "name": "",
+      "type": "tuple"
+    }
+  ],
+  "stateMutability": "view",
+  "type": "function"
+}
+```
+
+On remarque que l'`internal type` de la valeur de retour est bien `struct School.Student`.  
+Dans une abi l'`internal type` correspond au type côté smart contract.
+Mais on remarque le que le `type` est un `tuple`, donc une liste.
+Dans une abi le `type` est comment les call extérieur devront interpréter ce type.
+
+Vérifions avec `ethers.js` comment est récupéré cette structure `Student` lors d'un appel à `getStudent``
+
+```js
+const [deployer, student1] = await ethers.getSigners()
+const SchoolMagnet = await ethers.getContractFactory('SchoolMagnet')
+const schoolMagnet = await SchoolMagnet.connect(deployer).deploy()
+await schoolMagnet.deployed()
+
+// Register student1 as a student
+await schoolMagnet
+  .connect(student1)
+  .register('Sofiane', 'Akermoun', 'https://github.com/AbsoluteVirtueXI', 39, 3)
+// get student1 information
+const student1Info = await schoolMagnet.getStudent(student1.address)
+console.log(student1Info)
+```
+
+output:
+
+```js
+[
+  3,
+  true,
+  false,
+  BigNumber { _hex: '0x00', _isBigNumber: true },
+  BigNumber { _hex: '0x61d3ef26', _isBigNumber: true },
+  BigNumber { _hex: '0x27', _isBigNumber: true },
+  BigNumber { _hex: '0x60cc4326', _isBigNumber: true },
+  'Sofiane',
+  'Akermoun',
+  'https://github.com/AbsoluteVirtueXI',
+  course: 3,
+  isActive: true,
+  isCertified: false,
+  certificationDate: BigNumber { _hex: '0x00', _isBigNumber: true },
+  certificationDateLimit: BigNumber { _hex: '0x61d3ef26', _isBigNumber: true },
+  age: BigNumber { _hex: '0x27', _isBigNumber: true },
+  registrationDate: BigNumber { _hex: '0x60cc4326', _isBigNumber: true },
+  firstName: 'Sofiane',
+  lastName: 'Akermoun',
+  githubUrl: 'https://github.com/AbsoluteVirtueXI'
+]
+```
+
+Si une fonction Solidity retourne une structure, on pourra donc au choix interprété la valeur de retour comme un tableau, avec tous les élements dans le même ordre que les propriétés de la strucutre, ou sinon un objet littéral qui possède les mêmes propriétés que notre structure.
+
+#### Few words on optimization
 
 ## Storage: state variables
 
