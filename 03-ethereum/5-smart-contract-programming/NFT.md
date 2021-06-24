@@ -37,7 +37,7 @@ Concrétiser la propriété d'une ressource par un NFT permet donc très facilem
 ### EIP-721
 
 Le standard ERC-721 est défini dans l'EIP-721: https://eips.ethereum.org/EIPS/eip-721.  
-Et on peut retrouver l'impélementation de ce standard par Openzepplin sur leur repository Github: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol  
+Et on peut retrouver l'implémentation de ce standard par Openzepplin sur leur repository Github: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol  
 Une documentation de leur smart contract est disponible sur: https://docs.openzeppelin.com/contracts/4.x/erc721  
 L'api de l'ERC-721 d'OpenZepplin est documentée ici: https://docs.openzeppelin.com/contracts/4.x/api/token/erc721
 
