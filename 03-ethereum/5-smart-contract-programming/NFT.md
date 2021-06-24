@@ -43,4 +43,60 @@ L'api de l'ERC-721 d'OpenZepplin est documentée ici: https://docs.openzeppelin.
 
 ### ERC721 from OpenZepplin
 
-See remix livecoding
+Live coding:
+
+```solidity
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract GameLoot is ERC721, AccessControl {
+    using Counters for Counters.Counter;
+
+    enum LootType {
+        Weapon,
+        Armor
+    }
+
+    struct Loot {
+        LootType lootType;
+        uint256 attk;
+        uint256 def;
+        string name;
+    }
+
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    Counters.Counter private _lootIds;
+    mapping(uint256 => Loot) private _loots;
+
+    constructor() ERC721("GameLoot", "LOOT") {
+        _setupRole(MINTER_ROLE, msg.sender);
+    }
+
+    function loot(
+        address player,
+        LootType lootType,
+        uint256 attk,
+        uint256 def,
+        string memory name_
+    ) public onlyRole(MINTER_ROLE) returns (uint256) {
+        _lootIds.increment();
+        uint256 currentId = _lootIds.current();
+        _mint(player, currentId);
+        _loots[currentId] = Loot(lootType, attk, def, name_);
+        return currentId;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function getLootById(uint256 id) public view returns (Loot memory) {
+        return _loots[id];
+    }
+}
+```
