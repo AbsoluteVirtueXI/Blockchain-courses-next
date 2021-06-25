@@ -100,3 +100,100 @@ contract GameLoot is ERC721, AccessControl {
     }
 }
 ```
+
+### A better NFT contract with ERC721Enumerable and ERC721URIStorage
+
+L'exemple précédent fonctionne correctement, mais il nous manque un fonctionnalité assez essentielle: récupérer tous les NFT que possède une adresse. Afin de pouvoir avoir accès à cette fonctionnalité il faut donc hériter d'un ERC721 spécialisé qui possèdent de nouvelles fonctionnalités: `ERC721Enumerable`.  
+`ERC721Enumerable` est un ERC721 avec des fonctionnalités supplémentaires.  
+Nous pouvons en profiter pour également hériter de `ERC721URIStorage` qui nous ajoute la fonctionnalité de lier une url à un id de NFT qui contiendra des meta-données, souvent un fichier JSON. Ainsi des wallets ou des applications peuvent avoir accès aux informations et meta-données d'un NFT grâce à une url.
+
+```solidity
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+
+contract GameLoot is ERC721Enumerable, ERC721URIStorage, AccessControl {
+    using Counters for Counters.Counter;
+    using Strings for uint256; // pour convertir un uint256 en string facilement
+
+    enum LootType {
+        Weapon,
+        Armor
+    }
+
+    struct Loot {
+        LootType lootType;
+        uint256 itemId; // id de notre item dans le jeu. id connu des développeurs.
+        uint256 attk;
+        uint256 def;
+        string name;
+    }
+
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    Counters.Counter private _lootIds;
+    mapping(uint256 => Loot) private _loots;
+
+    constructor() ERC721("GameLoot", "LOOT") {
+        _setupRole(MINTER_ROLE, msg.sender);
+    }
+
+    function loot(
+        address player,
+        LootType lootType,
+        uint256 attk,
+        uint256 def,
+        uint256 itemId,
+        string memory name_
+    ) public onlyRole(MINTER_ROLE) returns (uint256) {
+        _lootIds.increment();
+        uint256 currentId = _lootIds.current();
+        _mint(player, currentId);
+        _setTokenURI(currentId, itemId.toString()); // .toString() sur un uint256 grâce à la lib Strings
+        _loots[currentId] = Loot(lootType, attk, def, itemId, name_);
+        return currentId;
+    }
+
+
+    function getLootById(uint256 id) public view returns (Loot memory) {
+        return _loots[id];
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override(ERC721URIStorage, ERC721) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    // Modifions _baseURI afin de retourner l'url de base
+    // Cette fonction est utilisée par tokenURI pour retourner une url complète.
+    // En fonction de l'item id (et pas du NFT id), nous aurons une url pour chacun de nos loots
+    function _baseURI() internal view virtual override(ERC721) returns (string memory) {
+        return "https://www.magnetgame.com/nft/";
+    }
+
+
+    // Il existe 2 définitions de supportsInterface, il faut aider le compilateur à gérer ce conflit.
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Enumerable, ERC721, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    // Il existe 2 définitions de _beforeTokenTransfer, il faut aider le compilateur à gérer ce conflit.
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    )  internal virtual override(ERC721Enumerable, ERC721) {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    // Il existe 2 définitions de _burn il faut aider le compilateur à gérer ce conflit.
+    function _burn(uint256 tokenId) internal virtual override(ERC721URIStorage, ERC721) {
+        super._burn(tokenId);
+    }
+}
+```
