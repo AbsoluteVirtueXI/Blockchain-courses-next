@@ -42,6 +42,6 @@ Pour récupérer son `collateral`, un utilisateur devra renvoyer les `Collateral
 **Exercice 3**:  
 Créer un smart contract `CollateralToken` qui sera un ERC20 et qui aura pour symbole `CT`.  
 Créer un smart contract `CollateralBackedToken` qui sera un ERC20 et qui aura pour symbole `CBT`.  
-Via une fonction `deposit`, un utilisateur pourra déposer du `CT` dans le smart contract `CollateralBackedToken` et recevra ainsi 1/2 fois la quantité de `CT` déposée, en `CBT`.
+Via une fonction `deposit`, un utilisateur pourra déposer du `CT` dans le smart contract `CollateralBackedToken` et recevra ainsi 1/2 fois la quantité de `CT` déposée, en `CBT`.  
 Via une fonction `withdraw`, un utilisateur pourra récupérer ses `CT` en brulant ses `CBT`, il recevra donc la deux fois de la quantité de `CBT` brûlée, en `CT`.  
 `1 CBT == 2 CT`.
