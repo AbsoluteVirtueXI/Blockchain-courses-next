@@ -45,3 +45,77 @@ Créer un smart contract `CollateralBackedToken` qui sera un ERC20 et qui aura p
 Via une fonction `deposit`, un utilisateur pourra déposer du `CT` dans le smart contract `CollateralBackedToken` et recevra ainsi 1/2 fois la quantité de `CT` déposée, en `CBT`.  
 Via une fonction `withdraw`, un utilisateur pourra récupérer ses `CT` en brulant ses `CBT`, il recevra donc la deux fois de la quantité de `CBT` brûlée, en `CT`.  
 `1 CBT == 2 CT`.
+
+## Stablecoins
+
+### Une monnaie de référence stable pour des échanges stables
+
+Nous pouvons vendre l'accès ou les services de notre Dapp/smart contract assez facilement en Ether ou en tokens. Malheureusement les cryptomonnaies n'étant pas régulées par une autorité de contrôle et le marché est volatile. Il est donc impossible de prendre une quantité de cryptomonnaie comme de l'Ether/BTC ou même un ERC20 standard comme prix de référence pour notre service.  
+En effet vendre l'accès à notre application 0.001 Ether aujourd'hui le 29 juin 2021 correspondrait à environ 1.74 Euro, mais cette même quantité d'Ether peut avoir un prix variant fortement dans les semaines qui suivent, pour le meilleur comme pour le pire.  
+Cet exemple s'applique aussi à une quantité de cryptomonnaies que l'on laisserait dormir sur notre wallet, ou à l'achat de bien `offchain` avec des cryptomonnaies.
+
+### La monnaie Fiat une monnaie stable ?
+
+Oui.  
+Les monnaies souveraines sont d'excellentes monnaies de références car elles possèdent une stabilité contrôlée par des autorités monétaires, de nos jours les banques centrales, qui se battent chaque jour contre une inflation ou une déflation trop importante.  
+Elles sont utilisés sur les marchés pour leur stabilité.
+De plus elles sont naturellement la référence des cryptomonnaies sur les marchés, actuellement on compare toujours le prix du BTC, de l'ETH ou d'un token à son prix en USD ou en EURO et pas l'inverse.  
+Les fiat sont donc d'excellentes monnaies de références, mais totalement inutilisables dans une application Blockchain, nous ne pouvons pas accepter du Dollar ou de l'Euro dans notre smart contract. Le problème est que l'émission de ces monnaies et les transactions avec ces monnaies se font `offchain`, il est donc impossible avec un pur processus `onchain` de récupérer des fiat ou des informations sur les cours des monnaies souveraines.
+
+### Tokens indexés sur des Fiat
+
+Ce sont les stablecoins.  
+Les stablescoins sont des tokens qui auront toujours la même valeur comparée à une monnaie de référence.  
+Actuellement la monnaie de référence généralement utilisée est le Dollar, ainsi nous aurons toujours `1 stable coin == 1 USD`.
+Les stables coins sont des ERC20, nous pouvons donc utiliser un équivalent du Dollar dans nos applications avec les fonctionnalités d'un ERC20, c'est très pratique pour nos applications décentralisées.
+Il existe actuellement 3 technologies pour créer des stables coins.
+
+#### Fiat-collateralized stablecoins
+
+Les `fiat-collateralized stablecoins` sont des `Collateral-backed Tokens` dont le collatéral est envoyé `offchain` pour créer `onchain` un stable coin.  
+Des fiats sont envoyés à une entreprise, sur leur compte en banque, qui gère ensuite l'émission des stablecoins qui seront ensuite envoyés à l'utilisateur.  
+Ce processus est totalement centralisé, l'entreprise à un total contrôle et il n'y a aucune transparence sur la quantité de fiat sur leur compte en banque. Il est impossible de savoir si la quantité de fiat sur leur compte en banque correspond à la quantité de stablecoins émis.  
+[Tether Limited](https://tether.to/) est une organisation qui fonctionne de cette manière, elle est la créatrice du stablecoin `Tether` aussi connu sous le symbole `USDT`.
+Leur whitepaper: https://tether.to/wp-content/uploads/2016/06/TetherWhitePaper.pdf
+Etant totalement centralisé, avec aucune transparence sur l'état de leur compte en banque qui reçoit le collatéral des utilisateurs c'est un modèle qui tend à ne plus exister.  
+Néanmoins l'`USDT` est actuellement le stablecoin le plus utilisé et qui possède la market cap la plus importante de tous les stablecoins.
+Tether Limited à fait l'objet de poursuites par la justice et est au centre de multiples allégations:
+
+- Tether USDT disparus
+- Manipulation des prix de marché par émission massive d'USDT
+- Une réserve de Fiat qui n'est pas synchronisé à la total supply de tous les USDT émis.
+
+Le smart contract de `TETHER USD` est déployé sur le mainnet à l'adresse [0xdac17f958d2ee523a2206206994597c13d831ec7](https://etherscan.io/address/0xdac17f958d2ee523a2206206994597c13d831ec7)
+
+**Exercice**:
+Trouver l'adresse de l'owner du smart contract déployé sur le mainnet.  
+Quelle est la particularité de cette adresse?  
+Quels sont les pouvoirs de cette adresse sur ce smart contract?
+
+#### Crypto-collateralized stablecoins
+
+Ces stables coins sont aussi des `Collateral-backed Tokens` mais cette fois le collatéral est de la cryptomonnaie.  
+L'émission de ces stablecoins peut donc totalement être gérée `onchain` par des smart contracts en fonction du collatéral reçu en cryptomonnaie et des règles définies.  
+Il faut néanmoins récupérer une information `offchain`: Le prix en fiat de la quantité de collatéral envoyé, pour cela un `oracle` est utilisé.  
+Un `oracle` est un smart contract qui est modifié/updaté par un programme `offchain` qui renseignera l'`oracle` avec les données récupérées.  
+Dans le cas d'un stablecoin, un oracle récupérera des informations sur des exchanges ou sites de référecement via leur api pour obtenir le prix en fiat du collatéral reçu et émettra la quantité de stablecoin correspondante.  
+L'architecture est décentralisé et donc plus complexe.  
+le `Crypto-collateralized stablecoin` le plus connu et le plus utilisé est le `DAI` crée par [MakerDAO](https://makerdao.com/en/).  
+Le whitepaper: https://makerdao.com/en/whitepaper
+Le protocole Maker est un `MakerDAO's Multi-Collateral Dai (MCD) System`, qui fonctionne de manière totalement décentralisée.  
+Ce protocole est reconnu comme l'un des plus avancé de l'écosystème nécessitant de grandes compétences techniques et financières pour le comprendre totalement.  
+Dans la [documentation](https://docs.makerdao.com/) du protocole nous pouvons retrouver une overview de l'architecture logicielle.  
+Tous les codes sont publics et accessibles sur leur [repository](https://github.com/makerdao).  
+Les composants essentiels sont:
+
+- Un système de gouvernance décentralisé permettant aux owners d'un token de gouvernance, le `MKR`, d'influer ou de paramétrer le protocole.
+- Un réseau d'oracle
+- un système d'`incentives` pour motiver l'utilisation du protocole
+- Une ingénierie financière dans la gestion des dettes et de surplus afin de garantir la stabilité du DAI.
+
+#### Algorithmic Stablecoins
+
+Les `Algorithmic Stablecoins` régulent leur prix en influant avec des algorithmes sur la total supply du stablecoin.  
+Ainsi l'enjeu est de faire baisser la total supply lorsque le stable coin est à moins de 1 Dollar pour créer de la rareté, ou l'inverse, d'augmenter la total supply si le stable coin est à plus de 1 Dollar.
+Dans le cas de [Ampleforth](https://www.ampleforth.org/) le prix du token est récupéré sur les marchés par des oracles et les balances de tous les utilisateurs sont augmentées ou diminuées en fonction du prix du stablecoin.  
+Le [Frax protocol](`https://frax.finance/`) est un autre exemple mais avec une autre méthode de régulation de son prix.
