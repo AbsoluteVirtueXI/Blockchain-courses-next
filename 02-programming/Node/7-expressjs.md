@@ -728,10 +728,6 @@ Donc si on exécute notre application express depuis un répertoire ou le dossie
 Mais si on souhaite exécuter notre application express depuis un répertoire différent cela posera problème. Pour cela il faudra que l'on travaille avec des chemins absolus.
 
 ```js
-// We can't use __filename and __dirname directive anymore in esm modules
-const __filename = fileURLToPath(import.meta.url) //chemin absolu de notre app.js
-const __dirname = dirname(__filename) // repertoire absolu ou est stocké notre app.js
-
 //serve static file
 app.use(express.static(path.join(__dirname, '../public')))
 ```
@@ -742,15 +738,11 @@ Depuis le début de nos cours nos scripts sont stockés dans notre package sous 
 Ajoutons à notre app de login précédente, la capacité d'afficher une app react copiée dans répertoire `public`.
 
 ```js
-import express from 'express'
-import bodyParser from 'body-parser'
+const express = require('express')
+const bodyParser = require('body-parser')
 
 import { fileURLToPath } from 'url'
 import path from 'path'
-
-// We can't use __filename and __dirname directive anymore in esm modules
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 // Our user database
 const db_user = {
