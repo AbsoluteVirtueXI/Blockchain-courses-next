@@ -660,7 +660,7 @@ const userChecker = (req, res, next) => {
   if (db_user.hasOwnProperty(username)) {
     next()
   } else {
-    res.send('Username or Password invalid.')
+    res.status(401).send('Username or password invalid.')
   }
 }
 
@@ -671,7 +671,7 @@ const passwordChecker = (req, res, next) => {
   if (db_user[username] === password) {
     next()
   } else {
-    res.send('Username or password invalid.')
+    res.status(401).send('Username or password invalid.')
   }
 }
 
@@ -744,7 +744,7 @@ const userChecker = (req, res, next) => {
   if (db_user.hasOwnProperty(username)) {
     next()
   } else {
-    res.send('Username or Password invalid.')
+    res.status(401).send('Username or password invalid.')
   }
 }
 
@@ -755,7 +755,7 @@ const passwordChecker = (req, res, next) => {
   if (db_user[username] === password) {
     next()
   } else {
-    res.send('Username or password invalid.')
+    res.status(401).send('Username or password invalid.')
   }
 }
 
