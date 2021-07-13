@@ -334,13 +334,14 @@ _wiki.js_:
 
 ```js
 const express = require('express')
-export const wiki = express.Router()
+const wiki = express.Router()
 wiki.get('/', (req, res) => {
   res.send('Welcome to the wiki')
 })
 wiki.get('/about', (req, res) => {
   res.send('about wiki page')
 })
+module.exports = { wiki }
 ```
 
 _app.js_:
@@ -623,12 +624,12 @@ yarn add body-parser
 ```
 
 ```js
-import express from 'express'
-import bodyParser from 'body-parser'
+const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
 
 const IP = '192.168.0.11'
-const PORT = 7777
+const PORT = 3333
 
 //Configure express to use body-parser as middleware.
 app.use(bodyParser.urlencoded({ extended: false })) // to support URL-encoded bodies
@@ -650,8 +651,8 @@ les requêtes pour se logger effectuent en général une requête POST lorsque l
 Côté backend on pourrait retrouver un code qui ressemblerait à ci-dessous:
 
 ```js
-import express from 'express'
-import bodyParser from 'body-parser'
+const express = require('express')
+const bodyParser = require('body-parser')
 
 // Our user database
 const db_user = {
@@ -682,7 +683,7 @@ const passwordChecker = (req, res, next) => {
 }
 
 const IP = '192.168.0.11'
-const PORT = 7777
+const PORT = 3333
 
 const app = express()
 
