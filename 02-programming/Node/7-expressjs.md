@@ -729,9 +729,7 @@ Ajoutons à notre app de login précédente, la capacité d'afficher une app rea
 
 ```js
 const express = require('express')
-
-import { fileURLToPath } from 'url'
-import path from 'path'
+const path = require('path')
 
 // Our user database
 const db_user = {
