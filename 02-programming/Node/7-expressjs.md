@@ -615,28 +615,22 @@ Dans tous les cas, il faudra toujours configurer le `header` de votre requête p
 'Content-type': 'application/json''
 ```
 
-### **Receive a POST requests on express side**
+### **Receive a POST request on express side**
 
-Pour récupérer des données depuis une requête POST, il est requis d'installer le package `body-parser`. C'est un middleware.
-
-```zsh
-yarn add body-parser
-```
+Pour récupérer des données depuis une requête POST, il faudra utiliser le middleware `express.json()`.
 
 ```js
 const express = require('express')
-const bodyParser = require('body-parser')
 const app = express()
 
 const IP = '192.168.0.11'
 const PORT = 3333
 
-//Configure express to use body-parser as middleware.
-app.use(bodyParser.urlencoded({ extended: false })) // to support URL-encoded bodies
-app.use(bodyParser.json()) // to support JSON-encoded bodies
+app.use(express.urlencoded({ extended: false })) // to support URL-encoded bodies
+app.use(express.json()) // to support JSON-encoded bodies
 
 app.post('/hello', (req, res) => {
-  // request.body is a js object containing the deserialized JSON
+  // req.body is a js object containing the deserialized JSON
   console.log(req.body)
   //close the connection
   res.end()
@@ -647,12 +641,11 @@ app.listen(PORT, IP, () => {
 })
 ```
 
-les requêtes pour se logger effectuent en général une requête POST lorsque le bouton submit d'une formulaire de login est cliqué.  
+Pour s'authentifier sur un portail ou se register on effectue en général une requête POST lorsque le bouton submit d'un formulaire de login est cliqué.  
 Côté backend on pourrait retrouver un code qui ressemblerait à ci-dessous:
 
 ```js
 const express = require('express')
-const bodyParser = require('body-parser')
 
 // Our user database
 const db_user = {
@@ -687,9 +680,8 @@ const PORT = 3333
 
 const app = express()
 
-// Configure express to use body-parser as middleware.
-app.use(bodyParser.urlencoded({ extended: false })) // to support URL-encoded bodies
-app.use(bodyParser.json()) // to support JSON-encoded bodies
+app.use(express.urlencoded({ extended: false })) // to support URL-encoded bodies
+app.use(express.json()) // to support JSON-encoded bodies
 
 // Configure express to use these 2 middleware for /login route only
 app.use('/login', userChecker)
@@ -728,18 +720,15 @@ Donc si on exécute notre application express depuis un répertoire ou le dossie
 Mais si on souhaite exécuter notre application express depuis un répertoire différent cela posera problème. Pour cela il faudra que l'on travaille avec des chemins absolus.
 
 ```js
-//serve static file
-app.use(express.static(path.join(__dirname, '../public')))
+// serve static files from site/public directory
+// our website files are stored in project_directory/site/public
+app.use(express.static(path.join(__dirname, 'site/public')))
 ```
-
-Pourquoi `../public` dans l'exemple précédent ?  
-Depuis le début de nos cours nos scripts sont stockés dans notre package sous le répertoire `src/`, il faut donc revenir dans le répertoire parent afin d'avoir le dossier `public/` dans le répertoire courant.
 
 Ajoutons à notre app de login précédente, la capacité d'afficher une app react copiée dans répertoire `public`.
 
 ```js
 const express = require('express')
-const bodyParser = require('body-parser')
 
 import { fileURLToPath } from 'url'
 import path from 'path'
@@ -772,17 +761,16 @@ const passwordChecker = (req, res, next) => {
   }
 }
 
-const IP = '192.168.0.11'
-const PORT = 7777
+const IP = '192.168.0.10'
+const PORT = 3333
 
 const app = express()
 
-// Configure express to use body-parser as middleware.
-app.use(bodyParser.urlencoded({ extended: false })) // to support URL-encoded bodies
-app.use(bodyParser.json()) // to support JSON-encoded bodies
+app.use(express.urlencoded({ extended: false })) // to support URL-encoded bodies
+app.use(express.json()) // to support JSON-encoded bodies
 
 //serve static files
-app.use(express.static(path.join(__dirname, '../public')))
+app.use(express.static(path.join(__dirname, 'public')))
 
 // Configure express to use these 2 middleware for /login route only
 app.use('/login', userChecker)
@@ -809,9 +797,9 @@ app.listen(PORT, IP, () => {
 
 L'application précédente offre 2 fonctionnalités:
 
-- Accès à une app react en allant sur http://192.168.0.11:7777
+- Accès à une app react en allant sur http://192.168.0.10:3333
 - Une système de login simple accessible par des requêtes POST sur
-  http://192.168.0.11:7777/login.
+  http://192.168.0.10:3333/login.
   Le format du JSON attendu est:
 
 ```JSON
