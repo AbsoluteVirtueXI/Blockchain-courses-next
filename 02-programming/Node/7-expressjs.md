@@ -720,7 +720,7 @@ Donc si on exécute notre application express depuis un répertoire ou le dossie
 Mais si on souhaite exécuter notre application express depuis un répertoire différent cela posera problème. Pour cela il faudra que l'on travaille avec des chemins absolus.
 
 ```js
-// serve static files from site/public directory
+// serve static files from site/public directory at "/" (default page)
 // our website files are stored in project_directory/site/public
 app.use(express.static(path.join(__dirname, 'site/public')))
 ```
