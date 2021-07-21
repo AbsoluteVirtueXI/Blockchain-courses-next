@@ -64,10 +64,11 @@ Vous pouvez maintenant vous connecter au serveur postgresql avec la commande sui
 ```zsh
 % sudo apt-get remove postgresql
 % sudo apt-get remove postgresql-11
+% sudo apt-get remove postgresql-12
 % wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 % echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
 % sudo apt-get update
-% sudo apt-get -y install postgresql-12 postgresql-client-12
+% sudo apt-get -y install postgresql-13 postgresql-client-13
 % sudo service postgresql start
 % sudo su - postgres
 % psql
@@ -91,7 +92,7 @@ Si vous êtes actuellement avec le user `postgres` vous devez revenir à votre s
 postgres% exit
 ```
 
-Dans le fichier _/etc/postgresql/12/main/pg_hba.conf_ remplacer toutes les méthodes d'authentification `TRUST`/`PEER` par des `md5`:
+Dans le fichier _/etc/postgresql/13/main/pg_hba.conf_ remplacer toutes les méthodes d'authentification `TRUST`/`PEER` par des `md5`:
 
 ```conf
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
@@ -180,6 +181,12 @@ Créez une table "users" avec 3 champs, une `PRIMARY KEY`de type `serial` que l'
 first_db=> CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(30), email VARCHAR(30));
 ```
 
+Pour récupérer le noms des colonnes et le type associée à ces colonnes il faut utiliser la commande:
+
+```sql
+first_db=> \d+ users;
+```
+
 ## INSERT data into tables
 
 Ajouter 2 lignes à la table "users":
@@ -217,7 +224,7 @@ first_db=> SELECT id, name FROM users;
 Appliquer une requête qu'à certaines lignes en fonction de la condition de la clause `WHERE`:
 
 ```sql
-first_db=> SELECT id FROM users WHERE name = 'alice';
+first_db=> SELECT id FROM users WHERE users.name = 'alice';
  id
 ----
   1
@@ -236,11 +243,11 @@ first_db=> ALTER TABLE users ADD COLUMN age SMALLINT CHECK (age >= 0) DEFAULT 0;
 ## UPDATE row values:
 
 ```sql
-first_db=> UPDATE users SET age = 20, email = 'alice@coldmail.com' WHERE name = 'alice';
+first_db=> UPDATE users SET age = 20, email = 'alice@coldmail.com' WHERE users.name = 'alice';
 ```
 
 ```sql
-first_db=> UPDATE users SET age = 30  WHERE name = 'bob';
+first_db=> UPDATE users SET age = 30  WHERE users.name = 'bob';
 ```
 
 ## DELETE rows:
@@ -254,16 +261,16 @@ first_db=> INSERT INTO users (name, email, age) VALUES ('universe', 'universe@ma
 Supprimons toutes les lignes qui contiennent une valeur "age" inférieure à 25 ou supérieure à 35:
 
 ```sql
-first_db=> DELETE FROM users WHERE age < 25 OR  age > 35;
+first_db=> DELETE FROM users WHERE users.age < 25 OR  users.age > 35;
 ```
 
 ## datatypes:
 
-Documentation officielle: https://www.postgresql.org/docs/12/datatype.html
+Documentation officielle: https://www.postgresql.org/docs/13/datatype.html
 
-## contraints:
+## constraints:
 
-Documentation officielle: https://www.postgresql.org/docs/12/ddl-constraints.html
+Documentation officielle: https://www.postgresql.org/docs/13/ddl-constraints.html
 
 ## DROP tables and databases:
 
