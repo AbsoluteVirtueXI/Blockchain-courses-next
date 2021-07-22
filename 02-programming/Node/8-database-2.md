@@ -32,7 +32,7 @@ db_app=> INSERT INTO products (title, description, price, seller_id) VALUES ('We
 Si nous souhaitons récupérer tous les produits que alice a mit en vente:
 
 ```sql
-db_app=> SELECT * FROM products where seller_id = (SELECT id FROM users WHERE login = 'alice');
+db_app=> SELECT * FROM products where products.seller_id = (SELECT id FROM users WHERE users.login = 'alice');
 ```
 
 ## JOIN
@@ -104,7 +104,7 @@ Nous avons jusqu'à présent entrer nos commandes à la main sur le prompt Postg
 _db_app2.sql_:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS db_app2;
+CREATE DATABASE db_app2;
 \c db_app2;
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -177,4 +177,54 @@ Nous pouvons ensuite nous connecter à la base db_app2:
 
 ```zsh
 % psql -d db_app2 -U db_user
+```
+
+## Dump & restore
+
+Pour créer un dump de notre base de donnée on utilise le binaire `pg_dump`.
+Pour créer un dump de la base de donnée db_app2:
+
+```zsh
+pg_dump -U db_user -W -Fc db_app2 > db_app2.dump
+```
+
+Cette commande va générer une archive compressée contenant notre base de donnée.
+Le format de cette archive est `custom-format`, le format le plus utilisé pour des dumps de bdd Postgresql.  
+Nous pourrons ensuite restaurer cette archive dans une nouvelle base de donnée avec la commande suivante:
+
+```zsh
+createdb -U db_user new_db_app
+pg_restore -d new_db_app -U db_user db_app2.dump
+```
+
+Si au lieu de restaurer notre dump dans une nouvelle base de donnée, nous souhaitons restaurer notre dump dans la même base de donnée dont il a été dumpé, en écrasant le contenu actuel de cette base de donnée:
+
+```zsh
+pg_restore -d postgres -U db_user --clean --create db_app2.dump
+```
+
+Il faudra se déconnecter de la base de donnée que l'on essaye d'écraser avant d'effectuer cette opération.
+
+### Alternative
+
+Au lieu de générer une archive comme backup nous pouvons aussi générer un fichier de script SQL:
+
+```zsh
+pg_dump -U db_user -W -Fp db_app2 --clean > db_app2.sql
+```
+
+L'option `--clean` est nécéssaire si l'on souhaite écraser une base de données qui existe déjà lors d'une restauration de ce dump.  
+Pour restaurer notre backup au format script SQL nous devons l'exécuter avec le binaire `psql`:
+
+```zsh
+psql -d db_app2 -U db_user -a -f db_app2.sql
+```
+
+Si nous voulons charger notre dump dans une nouvelle base de donnée il faudra la créer avant.
+
+Mais nous perdons ainsi tous les avantages de l'outil `pg_restore`, notamment sa rapidité d'exécution pour les grosses bases de données.  
+De plus avec l'outil `pg_restore` nous avons la possibilité d'obtenir le script SQL qui correspond à l'équivalent d'un dump en `custom format`:
+
+```zsh
+pg_restore --clean db_app2.dump -f db_app2.sql
 ```
