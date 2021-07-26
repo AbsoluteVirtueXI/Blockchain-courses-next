@@ -102,7 +102,7 @@ Le fichier `prisma/schema.prisma` est le `Prisma data model`, il sert à configu
 client installation:
 
 ```zsh
-npm install @prisma/client
+yarn add @prisma/client
 ```
 
 client generation:
