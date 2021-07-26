@@ -1,4 +1,4 @@
-# Prisma
+# Prisma 1
 
 Prisma est un ORM (Object Relational Mapper) nouvelle génération qui permet à nos script JS exécutés via Node.js de communiquer avec une base de donnée ou un serveur GraphQL.  
 L'avantage d'un ORM est qu'il est générique et qu'il peut supporter plusieuress bases de données, notamment Postgresql.  
