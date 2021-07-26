@@ -193,7 +193,7 @@ Nous pouvons maintenant récupérer toutes les entrées de la table `users` avec
 
 ```js
 // users sera un tableau d'objets. Chacune des clefs de ces objets correspondra au nom d'une colonne.
-const users = prisma.users.findMany()
+const users = await prisma.users.findMany()
 console.log(users)
 ```
 
