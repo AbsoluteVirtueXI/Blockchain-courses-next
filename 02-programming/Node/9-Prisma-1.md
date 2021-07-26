@@ -246,18 +246,16 @@ Nous avons aussi la possibilité de filtrer les résultats en fonction de certai
 // Equivalent en SQL:
 // SELECT login, "lastName", "firstName" FROM users WHERE id > 1;
 const users = await prisma.users.findMany({
-  const users = await prisma.users.findMany({
-    where: {
-      id: {
-        gt: 1, // greater than
-      },
+  where: {
+    id: {
+      gt: 1, // greater than
     },
-    select: {
-      login: true,
-      lastName: true,
-      firstName: true,
-    },
-  })
+  },
+  select: {
+    login: true,
+    lastName: true,
+    firstName: true,
+  },
 })
 console.log(users)
 ```
@@ -299,3 +297,11 @@ console.log(result)
 ```
 
 Il est actuellement impossible d'exprimer cette requête SQL avec des filtres Prisma, il faudra donc passer par une `raw query`.
+
+Une autre syntaxe, qui est préférable car elle permet d'utiliser facilement les templates string
+
+```js
+const email = 'charlie@mail.com'
+const result =
+  await prisma.$queryRaw`SELECT * FROM users WHERE email = ${email};`
+```
