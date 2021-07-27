@@ -123,7 +123,7 @@ Tous les types Prisma sont listé dans l'api réference: https://www.prisma.io/d
 Les relations fields servent à créer des relations entre les modèles. Leur type n'est pas un `scalar type`, comme listé ci dessus, mais un autre modèle.  
 Chaque relation entre deux modèles est exprimée avec 2 relations fields, un pour chacune des tables qui sont en relation. Ces fields auront comme type la table qu'ils reférencent.
 Il faudra absolument que l'une des tables ajoute `@relation` pour spécifier quels sont les champs liés entre les 2 tables.
-Le nom de ces relations pourra ensuite être utilisé par notre client Prisma avant de faire des requêtes.
+Le nom de ces relations pourra ensuite être utilisé par notre client Prisma lors de nos requêtes.
 
 ## Prisma studio
 
