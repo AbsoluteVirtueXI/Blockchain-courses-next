@@ -30,4 +30,6 @@ Block Explorer URL: https://testnet.bscscan.com
 
 https://testnet.binance.org/faucet-smart
 
+### Configure hardhat
+
 ## Polygon
