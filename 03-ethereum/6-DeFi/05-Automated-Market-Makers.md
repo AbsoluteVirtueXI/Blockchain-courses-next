@@ -87,10 +87,11 @@ La courbe d'une CPMM:
 
 ### Exercice
 
-Créer un smart contract qui gérera un pool de liquidité.
+Créer un smart contract qui gérera un pool de liquidité.  
 Ce pool de liquidité vide initialement permettra les swap entre 2 tokens ou 1 tokens et de l'Ether selon votre choix.
 
 - Une fonction `deposit` permettra d'initialiser la pool de liquidité avec une paire de 2 tokens (on ne peut initialiser le pool qu'une fois), celui qui effectue le deposit devient l'owner de la pool.
-- Une fonction `removeLiquidity` permettra à l'owner de récupérer ses tokens déposés dans le pool de liquidité
+- Une fonction `withdraw` permettra à l'owner de récupérer ses tokens déposés dans le pool de liquidité
 - une fonction `swap` permettra à un trader d'échanger ses tokens sur la pool en fonction d'une `Constant Product Market Maker`.
 - Ne pas prendre en compte les `fees` pour cet exercice.
+- Expliquer qu'est ce que le `slippage`
